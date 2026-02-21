@@ -76,4 +76,6 @@ elif opcao == "Mês Específico":
     c2.metric("Serviços Noturnos", f"{serv_n_m}")
 
 st.markdown("---")
-st.caption("Lógica: 12h Dia -> 12h Noite -> 3 Folgas")
+st.write("© **Autor: Sergio Ricardo**")
+st.write("📧 Contato: sergioricardo.ccufc@gmail.com")
+st.caption("Ciclo: 12h Dia -> 12h Noite -> 3 Folgas")
