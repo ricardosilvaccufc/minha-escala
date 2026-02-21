@@ -3,17 +3,17 @@ import pandas as pd
 from datetime import datetime, timedelta
 import calendar
 
-# Configuração da página
-st.set_page_config(page_title="Escala Diurno/Noturno 1x1x3", page_icon="🌙")
+# A LINHA ABAIXO DEFINE O NOME NA ABA DO NAVEGADOR
+st.set_page_config(page_title="Escala 12x24/12x72", page_icon="⚖️")
 
-st.title("🌙 Calculadora Escala (Diurno/Noturno + 3 Folgas)")
+st.title("⚖️ Calculadora Escala 12x24 / 12x72")
 st.markdown("---")
 
-# Dicionário para dias da semana abreviados
+# Dicionário para dias da semana abreviados em PT-BR
 DIAS_ABREV = {0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"}
 
 # 1. Entrada da Data de Referência
-st.info("⚠️ Informe o dia em que você iniciou o ciclo no **Serviço Diurno (7h-19h)**.")
+st.info("⚠️ Informe o dia em que você iniciou o ciclo no **Serviço Diurno (07h-19h)**.")
 data_ref = st.date_input(
     "Data do 1º Serviço Diurno:", 
     value=datetime.now(),
@@ -27,7 +27,7 @@ opcao = st.sidebar.radio(
 )
 
 def calcular_status_5dias(data_alvo, data_referencia):
-    # Ciclo de 5 dias (1 Diurno, 1 Noturno, 3 Folgas)
+    # Ciclo de 5 dias: Diurno (0), Noturno (1), Folga (2), Folga (3), Folga (4)
     diff = (data_alvo - data_referencia).days
     posicao = diff % 5
     
@@ -77,4 +77,4 @@ elif opcao == "Mês Específico":
     st.table(pd.DataFrame(datas_mes))
 
 st.markdown("---")
-st.caption("Ciclo: 12h Dia -> 12h Noite -> Folga -> Folga -> Folga")
+st.caption("Ciclo: 12h Dia -> 12h Noite -> 3 Folgas")
