@@ -9,21 +9,13 @@ st.set_page_config(page_title="Escala 1x3", page_icon="📅")
 st.title("📅 Calculadora de Escala 1x3")
 st.markdown("---")
 
-# Dicionário manual para garantir dias da semana em PT-BR
 DIAS_ABREV = {0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"}
 
 # 1. Entrada da Data de Referência
-data_ref = st.date_input(
-    "Que dia você estava de serviço?", 
-    value=datetime.now(),
-    format="DD/MM/YYYY"
-)
+data_ref = st.date_input("Que dia você estava de serviço?", value=datetime.now(), format="DD/MM/YYYY")
 
 st.sidebar.header("Opções de Visualização")
-opcao = st.sidebar.radio(
-    "Como deseja visualizar a escala?",
-    ("Data Específica", "Período de Dias", "Mês Específico")
-)
+opcao = st.sidebar.radio("Como deseja visualizar a escala?", ("Data Específica", "Período de Dias", "Mês Específico"))
 
 def calcular_status(data_alvo, data_referencia):
     diff = (data_alvo - data_referencia).days
@@ -39,16 +31,15 @@ if opcao == "Data Específica":
 elif opcao == "Período de Dias":
     qtd_dias = st.number_input("Quantos dias deseja gerar?", min_value=1, max_value=365, value=30)
     datas = []
+    total_servico = 0
     for i in range(qtd_dias):
         d = data_ref + timedelta(days=i)
-        status = "🔴 SERVIÇO" if i % 4 == 0 else "🟢 FOLGA"
-        datas.append({
-            "Data": d.strftime('%d/%m/%Y'), 
-            "Dia": DIAS_ABREV[d.weekday()], 
-            "Status": status
-        })
-    # Exibe sem a numeração lateral
+        status = calcular_status(d, data_ref)
+        if "SERVIÇO" in status: total_servico += 1
+        datas.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
+    
     st.dataframe(pd.DataFrame(datas), hide_index=True, use_container_width=True)
+    st.metric("Total de Serviços no período", f"{total_servico} Plantões")
 
 elif opcao == "Mês Específico":
     col1, col2 = st.columns(2)
@@ -59,16 +50,15 @@ elif opcao == "Mês Específico":
     
     _, num_dias = calendar.monthrange(int(ano), int(mes))
     datas_mes = []
+    total_servico_mes = 0
     for dia in range(1, num_dias + 1):
         d = datetime(int(ano), int(mes), dia).date()
         status = calcular_status(d, data_ref)
-        datas_mes.append({
-            "Data": d.strftime('%d/%m/%Y'), 
-            "Dia": DIAS_ABREV[d.weekday()], 
-            "Status": status
-        })
-    # Exibe sem a numeração lateral
+        if "SERVIÇO" in status: total_servico_mes += 1
+        datas_mes.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
+    
     st.dataframe(pd.DataFrame(datas_mes), hide_index=True, use_container_width=True)
+    st.metric(f"Total de Serviços em {mes}/{ano}", f"{total_servico_mes} Plantões")
 
 st.markdown("---")
 st.caption("Escala 24x72h | Formato: Dia/Mês/Ano")
