@@ -9,8 +9,26 @@ st.set_page_config(page_title="Escala 12x24/12x72", page_icon="⚖️")
 st.title("⚖️ Calculadora Escala 12x24 / 12x72")
 st.markdown("---")
 
-# Dicionário manual para garantir dias da semana em PT-BR sem erro de "Segmento"
+# Dicionário manual para garantir dias da semana em PT-BR
 DIAS_ABREV = {0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"}
+
+# --- LEGENDA NA BARRA LATERAL ---
+st.sidebar.header("📌 Legenda")
+st.sidebar.markdown("""
+- **☀️ DIURNO**: Trabalho das 07h às 19h.
+- **🌙 NOTURNO**: Trabalho das 19h às 07h.
+- **🟢 FOLGA**: Descanso integral.
+- **🟢 Folga Noturna**: Você trabalha de dia e folga à noite.
+- **🟢 Folga Diurna**: Você folga de dia e trabalha à noite.
+- **Pós-Noturno**: Primeira folga após sair do plantão da madrugada.
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.header("⚙️ Opções de Visualização")
+opcao = st.sidebar.radio(
+    "Como deseja visualizar?",
+    ("Data Específica", "Período de Dias", "Mês Específico")
+)
 
 # 1. Entrada da Data de Referência
 st.info("⚠️ Informe o dia em que você iniciou o ciclo no **Serviço Diurno (07h-19h)**.")
@@ -20,21 +38,14 @@ data_ref = st.date_input(
     format="DD/MM/YYYY"
 )
 
-st.sidebar.header("Opções de Visualização")
-opcao = st.sidebar.radio(
-    "Como deseja visualizar?",
-    ("Data Específica", "Período de Dias", "Mês Específico")
-)
-
 def calcular_status_5dias(data_alvo, data_referencia):
-    # Ciclo de 5 dias
     diff = (data_alvo - data_referencia).days
     posicao = diff % 5
     
     if posicao == 0:
-        return "☀️ DIURNO (07h às 19h) | 🟢 Folga Noturna"
+        return "☀️ DIURNO (07h-19h) | 🟢 Folga Noturna"
     elif posicao == 1:
-        return "🌙 NOTURNO (19h às 07h) | 🟢 Folga Diurna"
+        return "🌙 NOTURNO (19h-07h) | 🟢 Folga Diurna"
     elif posicao == 2:
         return "🟢 FOLGA (Pós-Noturno)"
     elif posicao == 3:
@@ -58,11 +69,7 @@ elif opcao == "Período de Dias":
     for i in range(qtd_dias):
         d = data_ref + timedelta(days=i)
         status = calcular_status_5dias(d, data_ref)
-        datas.append({
-            "Data": d.strftime('%d/%m/%Y'), 
-            "Dia": DIAS_ABREV[d.weekday()], 
-            "Status": status
-        })
+        datas.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
     st.table(pd.DataFrame(datas))
 
 elif opcao == "Mês Específico":
@@ -77,12 +84,8 @@ elif opcao == "Mês Específico":
     for dia in range(1, num_dias + 1):
         d = datetime(int(ano), int(mes), dia).date()
         status = calcular_status_5dias(d, data_ref)
-        datas_mes.append({
-            "Data": d.strftime('%d/%m/%Y'), 
-            "Dia": DIAS_ABREV[d.weekday()], 
-            "Status": status
-        })
+        datas_mes.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
     st.table(pd.DataFrame(datas_mes))
 
 st.markdown("---")
-st.caption("Lógica: 12h Dia (Folga Noite) -> 12h Noite (Folga Dia) -> 3 Folgas")
+st.caption("Ciclo: 12h Dia (Folga Noite) -> 12h Noite (Folga Dia) -> 3 Folgas")
