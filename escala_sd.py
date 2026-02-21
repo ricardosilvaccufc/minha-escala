@@ -3,13 +3,13 @@ import pandas as pd
 from datetime import datetime, timedelta
 import calendar
 
-# A LINHA ABAIXO DEFINE O NOME NA ABA DO NAVEGADOR
+# Configuração da página
 st.set_page_config(page_title="Escala 12x24/12x72", page_icon="⚖️")
 
 st.title("⚖️ Calculadora Escala 12x24 / 12x72")
 st.markdown("---")
 
-# Dicionário para dias da semana abreviados em PT-BR
+# Dicionário manual para garantir dias da semana em PT-BR sem erro de "Segmento"
 DIAS_ABREV = {0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"}
 
 # 1. Entrada da Data de Referência
@@ -27,14 +27,14 @@ opcao = st.sidebar.radio(
 )
 
 def calcular_status_5dias(data_alvo, data_referencia):
-    # Ciclo de 5 dias: Diurno (0), Noturno (1), Folga (2), Folga (3), Folga (4)
+    # Ciclo de 5 dias
     diff = (data_alvo - data_referencia).days
     posicao = diff % 5
     
     if posicao == 0:
-        return "☀️ DIURNO (07h às 19h)"
+        return "☀️ DIURNO (07h às 19h) | 🟢 Folga Noturna"
     elif posicao == 1:
-        return "🌙 NOTURNO (19h às 07h)"
+        return "🌙 NOTURNO (19h às 07h) | 🟢 Folga Diurna"
     elif posicao == 2:
         return "🟢 FOLGA (Pós-Noturno)"
     elif posicao == 3:
@@ -58,7 +58,11 @@ elif opcao == "Período de Dias":
     for i in range(qtd_dias):
         d = data_ref + timedelta(days=i)
         status = calcular_status_5dias(d, data_ref)
-        datas.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
+        datas.append({
+            "Data": d.strftime('%d/%m/%Y'), 
+            "Dia": DIAS_ABREV[d.weekday()], 
+            "Status": status
+        })
     st.table(pd.DataFrame(datas))
 
 elif opcao == "Mês Específico":
@@ -73,8 +77,12 @@ elif opcao == "Mês Específico":
     for dia in range(1, num_dias + 1):
         d = datetime(int(ano), int(mes), dia).date()
         status = calcular_status_5dias(d, data_ref)
-        datas_mes.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
+        datas_mes.append({
+            "Data": d.strftime('%d/%m/%Y'), 
+            "Dia": DIAS_ABREV[d.weekday()], 
+            "Status": status
+        })
     st.table(pd.DataFrame(datas_mes))
 
 st.markdown("---")
-st.caption("Ciclo: 12h Dia -> 12h Noite -> 3 Folgas")
+st.caption("Lógica: 12h Dia (Folga Noite) -> 12h Noite (Folga Dia) -> 3 Folgas")
