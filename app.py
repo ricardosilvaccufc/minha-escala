@@ -4,16 +4,22 @@ from datetime import datetime, timedelta
 import calendar
 
 # Configuração da página
-st.set_page_config(page_title="Escala de Serviço 1x3", page_icon="📅")
+st.set_page_config(page_title="Escala 1x3", page_icon="📅")
 
 st.title("📅 Calculadora de Escala 1x3")
 st.markdown("---")
 
-# 1. Entrada da Data de Referência com FORMATO DEFINIDO
+# Dicionário para traduzir e abreviar os dias da semana
+DIAS_ABREV = {
+    0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 
+    4: "Sex", 5: "Sáb", 6: "Dom"
+}
+
+# 1. Entrada da Data de Referência
 data_ref = st.date_input(
     "Que dia você estava de serviço?", 
     value=datetime.now(),
-    format="DD/MM/YYYY"  # Força o formato brasileiro no campo
+    format="DD/MM/YYYY"
 )
 
 st.sidebar.header("Opções de Visualização")
@@ -30,10 +36,11 @@ if opcao == "Data Específica":
     data_alvo = st.date_input(
         "Qual data deseja consultar?", 
         value=data_ref + timedelta(days=1),
-        format="DD/MM/YYYY" # Força o formato brasileiro aqui também
+        format="DD/MM/YYYY"
     )
     status = calcular_status(data_alvo, data_ref)
-    st.subheader(f"Resultado para {data_alvo.strftime('%d/%m/%Y')}:")
+    dia_sem = DIAS_ABREV[data_alvo.weekday()]
+    st.subheader(f"Resultado para {data_alvo.strftime('%d/%m/%Y')} ({dia_sem}):")
     st.info(f"Nesse dia você estará de: **{status}**")
 
 elif opcao == "Período de Dias":
@@ -44,7 +51,7 @@ elif opcao == "Período de Dias":
         status = "🔴 SERVIÇO" if i % 4 == 0 else "🟢 FOLGA"
         datas.append({
             "Data": d.strftime('%d/%m/%Y'), 
-            "Dia": d.strftime('%a'), 
+            "Dia": DIAS_ABREV[d.weekday()], 
             "Status": status
         })
     st.table(pd.DataFrame(datas))
@@ -63,10 +70,10 @@ elif opcao == "Mês Específico":
         status = calcular_status(d, data_ref)
         datas_mes.append({
             "Data": d.strftime('%d/%m/%Y'), 
-            "Dia": d.strftime('%a'), 
+            "Dia": DIAS_ABREV[d.weekday()], 
             "Status": status
         })
     st.table(pd.DataFrame(datas_mes))
 
 st.markdown("---")
-st.caption("Datas exibidas no padrão: Dia/Mês/Ano")
+st.caption("Escala 24x72h | Dias da semana em PT-BR")
