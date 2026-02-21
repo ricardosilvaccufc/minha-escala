@@ -9,11 +9,8 @@ st.set_page_config(page_title="Escala 1x3", page_icon="📅")
 st.title("📅 Calculadora de Escala 1x3")
 st.markdown("---")
 
-# Dicionário para traduzir e abreviar os dias da semana
-DIAS_ABREV = {
-    0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 
-    4: "Sex", 5: "Sáb", 6: "Dom"
-}
+# Dicionário manual para garantir dias da semana em PT-BR
+DIAS_ABREV = {0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"}
 
 # 1. Entrada da Data de Referência
 data_ref = st.date_input(
@@ -33,11 +30,7 @@ def calcular_status(data_alvo, data_referencia):
     return "🔴 SERVIÇO" if diff % 4 == 0 else "🟢 FOLGA"
 
 if opcao == "Data Específica":
-    data_alvo = st.date_input(
-        "Qual data deseja consultar?", 
-        value=data_ref + timedelta(days=1),
-        format="DD/MM/YYYY"
-    )
+    data_alvo = st.date_input("Qual data deseja consultar?", value=data_ref + timedelta(days=1), format="DD/MM/YYYY")
     status = calcular_status(data_alvo, data_ref)
     dia_sem = DIAS_ABREV[data_alvo.weekday()]
     st.subheader(f"Resultado para {data_alvo.strftime('%d/%m/%Y')} ({dia_sem}):")
@@ -54,14 +47,15 @@ elif opcao == "Período de Dias":
             "Dia": DIAS_ABREV[d.weekday()], 
             "Status": status
         })
-    st.table(pd.DataFrame(datas))
+    # Exibe sem a numeração lateral
+    st.dataframe(pd.DataFrame(datas), hide_index=True, use_container_width=True)
 
 elif opcao == "Mês Específico":
     col1, col2 = st.columns(2)
     with col1:
         mes = st.selectbox("Mês", list(range(1, 13)), index=datetime.now().month - 1)
     with col2:
-        ano = st.number_input("Ano", min_value=2020, max_value=2100, value=datetime.now().year)
+        ano = st.number_input("Ano", min_value=2024, max_value=2100, value=datetime.now().year)
     
     _, num_dias = calendar.monthrange(int(ano), int(mes))
     datas_mes = []
@@ -73,7 +67,8 @@ elif opcao == "Mês Específico":
             "Dia": DIAS_ABREV[d.weekday()], 
             "Status": status
         })
-    st.table(pd.DataFrame(datas_mes))
+    # Exibe sem a numeração lateral
+    st.dataframe(pd.DataFrame(datas_mes), hide_index=True, use_container_width=True)
 
 st.markdown("---")
-st.caption("Escala 24x72h | Dias da semana em PT-BR")
+st.caption("Escala 24x72h | Formato: Dia/Mês/Ano")
