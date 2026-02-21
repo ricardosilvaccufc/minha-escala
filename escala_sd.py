@@ -12,14 +12,14 @@ st.markdown("---")
 # Dicionário manual para garantir dias da semana em PT-BR
 DIAS_ABREV = {0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"}
 
-# --- BARRA LATERAL (ORDEM INVERTIDA) ---
+# --- BARRA LATERAL ---
 st.sidebar.header("⚙️ Opções de Visualização")
 opcao = st.sidebar.radio(
     "Como deseja visualizar?",
     ("Data Específica", "Período de Dias", "Mês Específico")
 )
 
-st.sidebar.markdown("---") # Linha divisória
+st.sidebar.markdown("---")
 
 st.sidebar.header("📌 Legenda")
 st.sidebar.markdown("""
@@ -71,7 +71,9 @@ elif opcao == "Período de Dias":
         d = data_ref + timedelta(days=i)
         status = calcular_status_5dias(d, data_ref)
         datas.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
-    st.table(pd.DataFrame(datas))
+    
+    # Oculta a coluna de índice (numeração lateral)
+    st.dataframe(pd.DataFrame(datas), hide_index=True, use_container_width=True)
 
 elif opcao == "Mês Específico":
     col1, col2 = st.columns(2)
@@ -86,7 +88,9 @@ elif opcao == "Mês Específico":
         d = datetime(int(ano), int(mes), dia).date()
         status = calcular_status_5dias(d, data_ref)
         datas_mes.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
-    st.table(pd.DataFrame(datas_mes))
+    
+    # Oculta a coluna de índice (numeração lateral)
+    st.dataframe(pd.DataFrame(datas_mes), hide_index=True, use_container_width=True)
 
 st.markdown("---")
 st.caption("Ciclo: 12h Dia (Folga Noite) -> 12h Noite (Folga Dia) -> 3 Folgas")
