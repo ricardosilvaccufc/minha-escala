@@ -61,4 +61,6 @@ elif opcao == "Mês Específico":
     st.metric(f"Total de Serviços em {mes}/{ano}", f"{total_servico_mes} Plantões")
 
 st.markdown("---")
+st.write("© **Autor: Sergio Ricardo**")
+st.write("📧 Contato: sergioricardo.ccufc@gmail.com")
 st.caption("Escala 24x72h | Formato: Dia/Mês/Ano")
