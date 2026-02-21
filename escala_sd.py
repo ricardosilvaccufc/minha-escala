@@ -12,7 +12,15 @@ st.markdown("---")
 # Dicionário manual para garantir dias da semana em PT-BR
 DIAS_ABREV = {0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"}
 
-# --- LEGENDA NA BARRA LATERAL ---
+# --- BARRA LATERAL (ORDEM INVERTIDA) ---
+st.sidebar.header("⚙️ Opções de Visualização")
+opcao = st.sidebar.radio(
+    "Como deseja visualizar?",
+    ("Data Específica", "Período de Dias", "Mês Específico")
+)
+
+st.sidebar.markdown("---") # Linha divisória
+
 st.sidebar.header("📌 Legenda")
 st.sidebar.markdown("""
 - **☀️ DIURNO**: Trabalho das 07h às 19h.
@@ -22,13 +30,6 @@ st.sidebar.markdown("""
 - **🟢 Folga Diurna**: Você folga de dia e trabalha à noite.
 - **Pós-Noturno**: Primeira folga após sair do plantão da madrugada.
 """)
-
-st.sidebar.markdown("---")
-st.sidebar.header("⚙️ Opções de Visualização")
-opcao = st.sidebar.radio(
-    "Como deseja visualizar?",
-    ("Data Específica", "Período de Dias", "Mês Específico")
-)
 
 # 1. Entrada da Data de Referência
 st.info("⚠️ Informe o dia em que você iniciou o ciclo no **Serviço Diurno (07h-19h)**.")
