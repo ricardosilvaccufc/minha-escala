@@ -1,0 +1,80 @@
+import streamlit as st
+import pandas as pd
+from datetime import datetime, timedelta
+import calendar
+
+# Configuração da página
+st.set_page_config(page_title="Escala Diurno/Noturno 1x1x3", page_icon="🌙")
+
+st.title("🌙 Calculadora Escala (Diurno/Noturno + 3 Folgas)")
+st.markdown("---")
+
+# Dicionário para dias da semana abreviados
+DIAS_ABREV = {0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"}
+
+# 1. Entrada da Data de Referência
+st.info("⚠️ Informe o dia em que você iniciou o ciclo no **Serviço Diurno (7h-19h)**.")
+data_ref = st.date_input(
+    "Data do 1º Serviço Diurno:", 
+    value=datetime.now(),
+    format="DD/MM/YYYY"
+)
+
+st.sidebar.header("Opções de Visualização")
+opcao = st.sidebar.radio(
+    "Como deseja visualizar?",
+    ("Data Específica", "Período de Dias", "Mês Específico")
+)
+
+def calcular_status_5dias(data_alvo, data_referencia):
+    # Ciclo de 5 dias (1 Diurno, 1 Noturno, 3 Folgas)
+    diff = (data_alvo - data_referencia).days
+    posicao = diff % 5
+    
+    if posicao == 0:
+        return "☀️ DIURNO (07h às 19h)"
+    elif posicao == 1:
+        return "🌙 NOTURNO (19h às 07h)"
+    elif posicao == 2:
+        return "🟢 FOLGA (Pós-Noturno)"
+    elif posicao == 3:
+        return "🟢 FOLGA"
+    elif posicao == 4:
+        return "🟢 FOLGA"
+    else:
+        return "Consultar escala anterior"
+
+# 2. Lógica das Opções
+if opcao == "Data Específica":
+    data_alvo = st.date_input("Data para consulta:", value=data_ref + timedelta(days=1), format="DD/MM/YYYY")
+    status = calcular_status_5dias(data_alvo, data_ref)
+    dia_sem = DIAS_ABREV[data_alvo.weekday()]
+    st.subheader(f"Resultado para {data_alvo.strftime('%d/%m/%Y')} ({dia_sem}):")
+    st.success(f"Status: **{status}**")
+
+elif opcao == "Período de Dias":
+    qtd_dias = st.number_input("Quantos dias gerar?", min_value=1, max_value=365, value=20)
+    datas = []
+    for i in range(qtd_dias):
+        d = data_ref + timedelta(days=i)
+        status = calcular_status_5dias(d, data_ref)
+        datas.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
+    st.table(pd.DataFrame(datas))
+
+elif opcao == "Mês Específico":
+    col1, col2 = st.columns(2)
+    with col1:
+        mes = st.selectbox("Mês", list(range(1, 13)), index=datetime.now().month - 1)
+    with col2:
+        ano = st.number_input("Ano", min_value=2024, max_value=2100, value=datetime.now().year)
+    
+    _, num_dias = calendar.monthrange(int(ano), int(mes))
+    datas_mes = []
+    for dia in range(1, num_dias + 1):
+        d = datetime(int(ano), int(mes), dia).date()
+        status = calcular_status_5dias(d, data_ref)
+        datas_mes.append({"Data": d.strftime('%d/%m/%Y'), "Dia": DIAS_ABREV[d.weekday()], "Status": status})
+    st.table(pd.DataFrame(datas_mes))
+
+st.markdown("---")
+st.caption("Ciclo: 12h Dia -> 12h Noite -> Folga -> Folga -> Folga")
